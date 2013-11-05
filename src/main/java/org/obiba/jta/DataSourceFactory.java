@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Component
-public class Utils {
+public class DataSourceFactory {
 
   private static final int MIN_POOL_SIZE = 3;
 
@@ -17,10 +17,10 @@ public class Utils {
 
   private static final int MAX_IDLE = 10;
 
-  public DataSource createDataSource() throws PropertyVetoException {
+  public DataSource createDataSource(String database) throws PropertyVetoException {
     ComboPooledDataSource dataSource = new ComboPooledDataSource();
     dataSource.setDriverClass("org.hsqldb.jdbcDriver");
-    dataSource.setJdbcUrl("jdbc:hsqldb:file:jta-test;shutdown=true;hsqldb.tx=mvcc");
+    dataSource.setJdbcUrl("jdbc:hsqldb:file:out/" + database + ";shutdown=true;hsqldb.tx=mvcc");
     dataSource.setUser("sa");
     dataSource.setPassword("");
     dataSource.setMinPoolSize(MIN_POOL_SIZE);
