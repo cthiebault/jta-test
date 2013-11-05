@@ -1,44 +1,48 @@
 package org.obiba.jta;
 
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
 @Component
 public class SessionFactoryFactory {
 
   @Autowired
-  private TransactionManager jtaTransactionManager;
+  private JtaTransactionManager transactionManager;
 
   @Autowired
   private ApplicationContext applicationContext;
 
   public SessionFactory createSessionFactory(DataSource dataSource) {
-    LocalSessionFactoryBean factoryBean = new LocalSessionFactoryBean();
-    factoryBean.setDataSource(dataSource);
-    factoryBean.setJtaTransactionManager(jtaTransactionManager);
-    factoryBean.getHibernateProperties().setProperty(Environment.HBM2DDL_AUTO, "update");
-    factoryBean.getHibernateProperties().setProperty(Environment.USE_STRUCTURED_CACHE, "true");
-    factoryBean.getHibernateProperties().setProperty(Environment.USE_QUERY_CACHE, "true");
-    factoryBean.getHibernateProperties().setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
-    factoryBean.getHibernateProperties()
+    LocalSessionFactoryBean factory = new LocalSessionFactoryBean();
+    factory.setDataSource(dataSource);
+    // will set
+    // hibernate.transaction.jta.platform=
+    // hibernate.transaction.factory_class=org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory
+    factory.setJtaTransactionManager(transactionManager);
+    factory.setAnnotatedClasses(new Class<?>[] { Entity.class });
+    factory.getHibernateProperties().setProperty(AvailableSettings.HBM2DDL_AUTO, "update");
+    factory.getHibernateProperties().setProperty(AvailableSettings.USE_STRUCTURED_CACHE, "true");
+    factory.getHibernateProperties().setProperty(AvailableSettings.USE_QUERY_CACHE, "true");
+    factory.getHibernateProperties().setProperty(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
+    factory.getHibernateProperties()
         .setProperty(Environment.CACHE_REGION_FACTORY, "org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory");
-    factoryBean.getHibernateProperties().setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
-    factoryBean.getHibernateProperties().setProperty(Environment.AUTO_CLOSE_SESSION, "true");
-    factoryBean.getHibernateProperties().setProperty(Environment.FLUSH_BEFORE_COMPLETION, "true");
-    factoryBean.setAnnotatedClasses(new Class<?>[] { Entity.class });
+    factory.getHibernateProperties().setProperty(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, "jta");
+    factory.getHibernateProperties().setProperty(AvailableSettings.AUTO_CLOSE_SESSION, "true");
+    factory.getHibernateProperties().setProperty(AvailableSettings.FLUSH_BEFORE_COMPLETION, "true");
 
     // Inject dependencies
-    factoryBean = (LocalSessionFactoryBean) applicationContext.getAutowireCapableBeanFactory()
-        .initializeBean(factoryBean, dataSource.hashCode() + "-sessionFactory");
+    factory = (LocalSessionFactoryBean) applicationContext.getAutowireCapableBeanFactory()
+        .initializeBean(factory, dataSource.hashCode() + "-sessionFactory");
 
-    return factoryBean.getObject();
+    return factory.getObject();
   }
 
 }
