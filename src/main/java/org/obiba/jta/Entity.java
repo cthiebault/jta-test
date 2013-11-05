@@ -3,6 +3,7 @@ package org.obiba.jta;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
+@SuppressWarnings("UnusedDeclaration")
 @javax.persistence.Entity
 public class Entity {
 
