@@ -1,0 +1,59 @@
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.8'
+}
+
+configurations {
+  compile
+  runtime
+  all*.exclude group: 'commons-logging'
+}
+
+ext {
+  slf4jVersion = '1.7.5'
+  springVersion = '3.2.4.RELEASE'
+}
+
+dependencies {
+  compile('com.mchange:c3p0:0.9.5-pre5')
+  compile('org.hsqldb:hsqldb:2.3.1')
+  compile('javax.transaction:jta:1.1')
+  compile('org.hibernate:hibernate-core:4.2.7.SP1')
+  compile('org.ow2.jotm:jotm-core:2.2.3') {
+    exclude group: 'org.ow2.carol.irmi', module: 'irmi'
+    exclude group: 'org.ow2.cmi', module: 'cmi-admin'
+    exclude group: 'org.ow2.cmi', module: 'cmi-jndi'
+    exclude group: 'org.jacorb', module: 'jacorb'
+    exclude group: 'org.jacorb', module: 'jacorb-idl'
+  }
+  compile('org.ow2.spec.ee:ow2-connector-1.5-spec:1.0.13')
+  compile('org.ow2.spec.ee:ow2-jta-1.1-spec:1.0.13')
+  compile("org.slf4j:slf4j-api:${slf4jVersion}")
+  compile("org.springframework:spring-beans:${springVersion}")
+  compile("org.springframework:spring-context:${springVersion}")
+  compile("org.springframework:spring-test:${springVersion}")
+  compile("org.springframework:spring-tx:${springVersion}")
+
+  runtime('ch.qos.logback:logback-classic:1.0.13')
+  runtime("org.slf4j:jul-to-slf4j:${slf4jVersion}")
+  runtime("org.slf4j:jcl-over-slf4j:${slf4jVersion}")
+
+  testCompile('junit:junit:4.11')
+}
+
+test {
+  testLogging.showStandardStreams = true
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+tasks.withType(Compile) {
+  options.encoding = 'UTF-8'
+}
