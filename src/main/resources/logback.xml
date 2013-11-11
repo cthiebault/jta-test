@@ -12,6 +12,9 @@
   </appender>
 
   <logger name="org.obiba" level="debug"/>
+  <logger name="org.eclipse.jetty" level="debug"/>
+  <logger name="org.jboss.resteasy" level="debug"/>
+  <logger name="org.springframework" level="debug"/>
 
   <root level="info">
     <appender-ref ref="console"/>
