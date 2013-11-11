@@ -1,10 +1,11 @@
-package org.obiba.jta;
+package org.obiba.jta.service;
 
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
+import org.obiba.jta.entity.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

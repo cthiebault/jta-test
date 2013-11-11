@@ -10,7 +10,7 @@
 
   <tx:annotation-driven/>
 
-  <bean id="jtaTransactionManager" class="org.obiba.jta.JotmFactoryBean"/>
+  <bean id="jtaTransactionManager" class="org.obiba.jta.service.JotmFactoryBean"/>
 
   <bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
     <property name="transactionManager" ref="jtaTransactionManager"/>

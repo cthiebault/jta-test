@@ -1,10 +1,11 @@
-package org.obiba.jta;
+package org.obiba.jta.service;
 
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Environment;
+import org.obiba.jta.entity.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;

@@ -1,4 +1,4 @@
-package org.obiba.jta;
+package org.obiba.jta.entity;
 
 import javax.persistence.Id;
 import javax.persistence.Version;

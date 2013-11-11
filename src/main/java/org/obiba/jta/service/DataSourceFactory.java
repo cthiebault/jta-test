@@ -1,4 +1,4 @@
-package org.obiba.jta;
+package org.obiba.jta.service;
 
 import java.beans.PropertyVetoException;
 
