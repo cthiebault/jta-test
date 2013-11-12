@@ -20,6 +20,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
@@ -103,9 +104,11 @@ public class JettyServer {
 
   public void createJerseyServlet() {
     log.debug("Configure Jersey Servlet");
-    ServletHolder servletHolder = new ServletHolder(new ServletContainer());
-    servletHolder
-        .setInitParameter(ServerProperties.PROVIDER_PACKAGES, "org.obiba.jta.web;org.glassfish.jersey.server.spring");
+    ResourceConfig resourceConfig = new ResourceConfig();
+    resourceConfig.packages("org.obiba.jta.web", "org.glassfish.jersey.server.spring");
+//    resourceConfig.register(LoggingFilter.class);
+    resourceConfig.register(FilterTest.class);
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
     servletHolder.setInitParameter(ServerProperties.TRACING, "ALL");
     servletHolder.setInitParameter(ServerProperties.TRACING_THRESHOLD, "VERBOSE");
     servletContextHandler.addServlet(servletHolder, "/ws/*");
