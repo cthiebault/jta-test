@@ -19,11 +19,15 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.server.ServerProperties;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -50,25 +54,28 @@ public class JettyServer {
 
   private Server jettyServer;
 
-  private ServletContextHandler contextHandler;
+  private ServletContextHandler servletContextHandler;
 
   private ConfigurableApplicationContext webApplicationContext;
 
   @PostConstruct
   public void init() {
+
+    log.info("Configure Jetty Server");
     jettyServer = new Server();
     jettyServer.setSendServerVersion(false);
-    // OPAL-342: We will manually stop the Jetty server instead of relying its shutdown hook
     jettyServer.setStopAtShutdown(false);
 
-    configureHttpConnector();
+    createHttpConnector();
+    createServletHandler();
+    createJerseyServlet();
 
     HandlerList handlers = new HandlerList();
-    handlers.addHandler(contextHandler = createServletHandler());
+    handlers.addHandler(servletContextHandler);
     jettyServer.setHandler(handlers);
   }
 
-  private void configureHttpConnector() {
+  private void createHttpConnector() {
     Connector httpConnector = new SelectChannelConnector();
     httpConnector.setPort(HTTP_PORT);
     httpConnector.setMaxIdleTime(MAX_IDLE_TIME);
@@ -76,9 +83,32 @@ public class JettyServer {
     jettyServer.addConnector(httpConnector);
   }
 
-  //  @Bean
-  public ServletContextHandler getServletContextHandler() {
-    return contextHandler;
+  private void createServletHandler() {
+    servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
+    servletContextHandler.setContextPath("/");
+    servletContextHandler.addFilter(new FilterHolder(new RequestContextFilter()), "/*", FilterMapping.DEFAULT);
+    initApplicationContext();
+    servletContextHandler.getServletContext()
+        .setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
+  }
+
+  private void initApplicationContext() {
+    ServletContext context = servletContextHandler.getServletContext();
+    webApplicationContext = new XmlWebApplicationContext();
+    webApplicationContext.setParent(applicationContext);
+    ((ConfigurableWebApplicationContext) webApplicationContext).setServletContext(context);
+    ((AbstractRefreshableConfigApplicationContext) webApplicationContext)
+        .setConfigLocation("classpath:application-context.xml");
+  }
+
+  public void createJerseyServlet() {
+    log.debug("Configure Jersey Servlet");
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer());
+    servletHolder
+        .setInitParameter(ServerProperties.PROVIDER_PACKAGES, "org.obiba.jta.web;org.glassfish.jersey.server.spring");
+    servletHolder.setInitParameter(ServerProperties.TRACING, "ALL");
+    servletHolder.setInitParameter(ServerProperties.TRACING_THRESHOLD, "VERBOSE");
+    servletContextHandler.addServlet(servletHolder, "/ws/*");
   }
 
   public void start() {
@@ -109,25 +139,9 @@ public class JettyServer {
 
   }
 
-  private ServletContextHandler createServletHandler() {
-    ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
-    handler.setContextPath("/");
-    handler.addFilter(new FilterHolder(new RequestContextFilter()), "/*", FilterMapping.DEFAULT);
-
-    initApplicationContext(handler.getServletContext());
-
-    handler.getServletContext()
-        .setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
-
-    return handler;
-  }
-
-  private void initApplicationContext(ServletContext context) {
-    webApplicationContext = new XmlWebApplicationContext();
-    webApplicationContext.setParent(applicationContext);
-    ((ConfigurableWebApplicationContext) webApplicationContext).setServletContext(context);
-    ((AbstractRefreshableConfigApplicationContext) webApplicationContext)
-        .setConfigLocation("classpath:application-context.xml");
+  @Bean
+  public ServletContextHandler getServletContextHandler() {
+    return servletContextHandler;
   }
 
 }
