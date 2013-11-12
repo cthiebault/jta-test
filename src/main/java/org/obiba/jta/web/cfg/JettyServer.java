@@ -39,7 +39,7 @@ public class JettyServer {
 
   private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
 
-  private static final int HTTP_PORT = 80;
+  private static final int HTTP_PORT = 8058;
 
   private static final int MAX_IDLE_TIME = 30000;
 
