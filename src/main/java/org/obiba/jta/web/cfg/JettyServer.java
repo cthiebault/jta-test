@@ -53,6 +53,9 @@ public class JettyServer {
   @Autowired
   private ApplicationContext applicationContext;
 
+  @Autowired
+  private FilterTest filterTest;
+
   private Server jettyServer;
 
   private ServletContextHandler servletContextHandler;
@@ -107,7 +110,8 @@ public class JettyServer {
     ResourceConfig resourceConfig = new ResourceConfig();
     resourceConfig.packages("org.obiba.jta.web", "org.glassfish.jersey.server.spring");
 //    resourceConfig.register(LoggingFilter.class);
-    resourceConfig.register(FilterTest.class);
+//    resourceConfig.register(FilterTest.class);
+    resourceConfig.register(filterTest);
     ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
     servletHolder.setInitParameter(ServerProperties.TRACING, "ALL");
     servletHolder.setInitParameter(ServerProperties.TRACING_THRESHOLD, "VERBOSE");

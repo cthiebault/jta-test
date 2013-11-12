@@ -9,18 +9,27 @@ import javax.ws.rs.ext.Provider;
 
 import org.glassfish.jersey.server.ExtendedUriInfo;
 import org.glassfish.jersey.server.model.ResourceMethod;
+import org.obiba.jta.service.IntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Provider
 @Priority(Integer.MAX_VALUE)
+@Component
 public class FilterTest implements ContainerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(FilterTest.class);
 
+  @Autowired
+  private IntegrationService integrationService;
+
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
+
     ResourceMethod method = ((ExtendedUriInfo) requestContext.getUriInfo()).getMatchedResourceMethod();
+    log.info(">> integrationService: {}", integrationService);
     log.info(">> method: {}", method);
     log.info(">> getHandlingMethod: {}", method.getInvocable().getHandlingMethod());
   }
