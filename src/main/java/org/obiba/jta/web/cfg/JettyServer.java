@@ -9,8 +9,11 @@
  ******************************************************************************/
 package org.obiba.jta.web.cfg;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
+import javax.ws.rs.ext.Provider;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -20,8 +23,8 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +55,6 @@ public class JettyServer {
 
   @Autowired
   private ApplicationContext applicationContext;
-
-  @Autowired
-  private FilterTest filterTest;
 
   private Server jettyServer;
 
@@ -106,16 +106,19 @@ public class JettyServer {
   }
 
   public void createJerseyServlet() {
-    log.debug("Configure Jersey Servlet");
     ResourceConfig resourceConfig = new ResourceConfig();
     resourceConfig.packages("org.obiba.jta.web", "org.glassfish.jersey.server.spring");
-//    resourceConfig.register(LoggingFilter.class);
-//    resourceConfig.register(FilterTest.class);
-    resourceConfig.register(filterTest);
+    resourceConfig.register(LoggingFilter.class);
+
+    // manually register providers :(
+    // http://stackoverflow.com/questions/19962472/jersey-spring-managed-providers
+    Map<String, Object> providers = applicationContext.getBeansWithAnnotation(Provider.class);
+    for(Object provider : providers.values()) {
+      resourceConfig.register(provider);
+    }
+
     ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
-    servletHolder.setInitParameter(ServerProperties.TRACING, "ALL");
-    servletHolder.setInitParameter(ServerProperties.TRACING_THRESHOLD, "VERBOSE");
-    servletContextHandler.addServlet(servletHolder, "/ws/*");
+    servletContextHandler.addServlet(servletHolder, "/*");
   }
 
   public void start() {

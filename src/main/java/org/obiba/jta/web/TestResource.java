@@ -33,4 +33,10 @@ public class TestResource {
     return "isActualTransactionActive: " + TransactionSynchronizationManager.isActualTransactionActive();
   }
 
+  @GET
+  @Path("/exception")
+  @Produces(MediaType.TEXT_PLAIN)
+  public String testException() {
+    throw new NullPointerException();
+  }
 }
