@@ -9,22 +9,15 @@
  ******************************************************************************/
 package org.obiba.jta.web.cfg;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
-import javax.ws.rs.ext.Provider;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +29,8 @@ import org.springframework.context.support.AbstractRefreshableConfigApplicationC
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.filter.RequestContextFilter;
 
 /**
  *
@@ -90,7 +83,7 @@ public class JettyServer {
   private void createServletHandler() {
     servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
     servletContextHandler.setContextPath("/");
-    servletContextHandler.addFilter(new FilterHolder(new RequestContextFilter()), "/*", FilterMapping.DEFAULT);
+    servletContextHandler.addEventListener(new RequestContextListener());
     initApplicationContext();
     servletContextHandler.getServletContext()
         .setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
@@ -106,18 +99,19 @@ public class JettyServer {
   }
 
   public void createJerseyServlet() {
-    ResourceConfig resourceConfig = new ResourceConfig();
-    resourceConfig.packages("org.obiba.jta.web", "org.glassfish.jersey.server.spring");
-    resourceConfig.register(LoggingFilter.class);
-
+//    ResourceConfig resourceConfig = new ResourceConfig();
+//    resourceConfig.packages("org.obiba.jta.web");
+//    resourceConfig.register(RequestContextFilter.class);
+//    resourceConfig.register(LoggingFilter.class);
     // manually register providers :(
     // http://stackoverflow.com/questions/19962472/jersey-spring-managed-providers
-    Map<String, Object> providers = applicationContext.getBeansWithAnnotation(Provider.class);
-    for(Object provider : providers.values()) {
-      resourceConfig.register(provider);
-    }
-
-    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
+//    Map<String, Object> providers = applicationContext.getBeansWithAnnotation(Provider.class);
+//    for(Object provider : providers.values()) {
+//      resourceConfig.register(provider);
+//    }
+//    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer());
+    servletHolder.setInitParameter("javax.ws.rs.Application", JerseyApplication.class.getName());
     servletContextHandler.addServlet(servletHolder, "/*");
   }
 
