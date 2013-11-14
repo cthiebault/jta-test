@@ -13,6 +13,7 @@
 
   <logger name="org.obiba" level="debug"/>
   <logger name="org.glassfish.jersey" level="trace"/>
+  <logger name="org.jboss.resteasy" level="trace"/>
   <logger name="org.springframework" level="debug"/>
   <logger name="org.jvnet.hk2" level="trace"/>
 

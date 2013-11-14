@@ -15,14 +15,12 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
-import org.glassfish.jersey.servlet.ServletContainer;
-import org.glassfish.jersey.servlet.ServletProperties;
+import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap;
+import org.jboss.resteasy.plugins.spring.SpringContextLoaderListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 
 /**
@@ -51,8 +49,10 @@ public class JettyServer {
 
     servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
     servletContextHandler.setContextPath("/");
+    // listeners order is important!
+    servletContextHandler.addEventListener(new ResteasyBootstrap());
+    servletContextHandler.addEventListener(new SpringContextLoaderListener());
     servletContextHandler.addEventListener(new RequestContextListener());
-    servletContextHandler.addEventListener(new ContextLoaderListener());
     servletContextHandler.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "classpath:application-context.xml");
 
     createHttpConnector();
@@ -76,14 +76,7 @@ public class JettyServer {
   }
 
   public void createJerseyServlet() {
-
-    ResourceConfig resourceConfig = new ResourceConfig();
-    resourceConfig.packages("org.obiba.jta.web");
-    resourceConfig.register(RequestContextFilter.class);
-    resourceConfig.property(ServletProperties.PROVIDER_WEB_APP, "true");
-    resourceConfig.register(FilterTest.class);
-
-    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
+    ServletHolder servletHolder = new ServletHolder(new HttpServletDispatcher());
     servletContextHandler.addServlet(servletHolder, "/*");
   }
 

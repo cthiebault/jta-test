@@ -1,15 +1,13 @@
 package org.obiba.jta.web.cfg;
 
-import java.io.IOException;
-
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.Provider;
 
-import org.glassfish.jersey.server.ExtendedUriInfo;
-import org.glassfish.jersey.server.model.Invocable;
-import org.glassfish.jersey.server.model.ResourceMethod;
-import org.glassfish.jersey.server.model.ResourceModelComponent;
+import org.jboss.resteasy.core.ResourceMethodInvoker;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.spi.Failure;
+import org.jboss.resteasy.spi.HttpRequest;
+import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 import org.obiba.jta.service.IntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Provider
 @Component
-public class FilterTest implements ContainerRequestFilter {
+public class FilterTest implements PreProcessInterceptor {
 
   private static final Logger log = LoggerFactory.getLogger(FilterTest.class);
 
@@ -26,19 +24,11 @@ public class FilterTest implements ContainerRequestFilter {
   private IntegrationService integrationService;
 
   @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
+  public ServerResponse preProcess(HttpRequest request, ResourceMethodInvoker method)
+      throws Failure, WebApplicationException {
+    log.info(">>> integrationService: {}", integrationService);
+    log.info(">>> method: {}", method);
 
-    ResourceMethod method = ((ExtendedUriInfo) requestContext.getUriInfo()).getMatchedResourceMethod();
-    log.info("integrationService: {}", integrationService);
-    log.info("method: {}", method);
-    Invocable invocable = method.getInvocable();
-    log.info("getHandlingMethod: {}", invocable.getHandlingMethod());
-    log.info("parent: {}", method.getParent());
-    for(ResourceModelComponent resourceModelComponent : invocable.getComponents()) {
-      log.info("  resourceModelComponent: {}", resourceModelComponent);
-      log.info("  class: {}", resourceModelComponent.getClass());
-    }
-    log.info("handler: {}", invocable.getHandler().getHandlerClass());
+    return null;
   }
-
 }
