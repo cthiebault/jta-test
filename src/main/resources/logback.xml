@@ -13,7 +13,8 @@
 
   <logger name="org.obiba" level="debug"/>
   <logger name="org.glassfish.jersey" level="trace"/>
-  <!--<logger name="org.springframework" level="debug"/>-->
+  <logger name="org.springframework" level="debug"/>
+  <logger name="org.jvnet.hk2" level="trace"/>
 
   <root level="info">
     <appender-ref ref="console"/>

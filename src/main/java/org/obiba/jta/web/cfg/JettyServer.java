@@ -9,33 +9,25 @@
  ******************************************************************************/
 package org.obiba.jta.web.cfg;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.glassfish.jersey.servlet.ServletProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.AbstractRefreshableConfigApplicationContext;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.ConfigurableWebApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  *
  */
-@Component
 public class JettyServer {
 
   private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
@@ -46,30 +38,33 @@ public class JettyServer {
 
   private static final int REQUEST_HEADER_SIZE = 8192;
 
-  @Autowired
-  private ApplicationContext applicationContext;
+  private final Server jettyServer;
 
-  private Server jettyServer;
+  private final ServletContextHandler servletContextHandler;
 
-  private ServletContextHandler servletContextHandler;
-
-  private ConfigurableApplicationContext webApplicationContext;
-
-  @PostConstruct
-  public void init() {
+  public JettyServer() throws Exception {
 
     log.info("Configure Jetty Server");
     jettyServer = new Server();
     jettyServer.setSendServerVersion(false);
     jettyServer.setStopAtShutdown(false);
 
+    servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
+    servletContextHandler.setContextPath("/");
+    servletContextHandler.addEventListener(new RequestContextListener());
+    servletContextHandler.addEventListener(new ContextLoaderListener());
+    servletContextHandler.setInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "classpath:application-context.xml");
+
     createHttpConnector();
-    createServletHandler();
+
     createJerseyServlet();
 
     HandlerList handlers = new HandlerList();
     handlers.addHandler(servletContextHandler);
     jettyServer.setHandler(handlers);
+
+    jettyServer.start();
+    jettyServer.join();
   }
 
   private void createHttpConnector() {
@@ -80,72 +75,16 @@ public class JettyServer {
     jettyServer.addConnector(httpConnector);
   }
 
-  private void createServletHandler() {
-    servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SECURITY);
-    servletContextHandler.setContextPath("/");
-    servletContextHandler.addEventListener(new RequestContextListener());
-    initApplicationContext();
-    servletContextHandler.getServletContext()
-        .setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
-  }
-
-  private void initApplicationContext() {
-    ServletContext context = servletContextHandler.getServletContext();
-    webApplicationContext = new XmlWebApplicationContext();
-    webApplicationContext.setParent(applicationContext);
-    ((ConfigurableWebApplicationContext) webApplicationContext).setServletContext(context);
-    ((AbstractRefreshableConfigApplicationContext) webApplicationContext)
-        .setConfigLocation("classpath:application-context.xml");
-  }
-
   public void createJerseyServlet() {
-//    ResourceConfig resourceConfig = new ResourceConfig();
-//    resourceConfig.packages("org.obiba.jta.web");
-//    resourceConfig.register(RequestContextFilter.class);
-//    resourceConfig.register(LoggingFilter.class);
-    // manually register providers :(
-    // http://stackoverflow.com/questions/19962472/jersey-spring-managed-providers
-//    Map<String, Object> providers = applicationContext.getBeansWithAnnotation(Provider.class);
-//    for(Object provider : providers.values()) {
-//      resourceConfig.register(provider);
-//    }
-//    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
-    ServletHolder servletHolder = new ServletHolder(new ServletContainer());
-    servletHolder.setInitParameter("javax.ws.rs.Application", JerseyApplication.class.getName());
+
+    ResourceConfig resourceConfig = new ResourceConfig();
+    resourceConfig.packages("org.obiba.jta.web");
+    resourceConfig.register(RequestContextFilter.class);
+    resourceConfig.property(ServletProperties.PROVIDER_WEB_APP, "true");
+    resourceConfig.register(FilterTest.class);
+
+    ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
     servletContextHandler.addServlet(servletHolder, "/*");
-  }
-
-  public void start() {
-    try {
-      webApplicationContext.refresh();
-      log.info("Starting Opal HTTP/s Server on port {}", jettyServer.getConnectors()[0].getPort());
-      jettyServer.start();
-    } catch(Exception e) {
-      log.error("Error starting jetty", e);
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void stop() {
-    try {
-      if(webApplicationContext.isActive()) {
-        webApplicationContext.close();
-      }
-    } catch(RuntimeException e) {
-      log.warn("Exception during web application context shutdown", e);
-    }
-
-    try {
-      jettyServer.stop();
-    } catch(Exception e) {
-      log.warn("Exception during HTTPd server shutdown", e);
-    }
-
-  }
-
-  @Bean
-  public ServletContextHandler getServletContextHandler() {
-    return servletContextHandler;
   }
 
 }
