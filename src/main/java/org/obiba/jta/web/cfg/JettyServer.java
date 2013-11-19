@@ -77,7 +77,8 @@ public class JettyServer {
 
   public void createJerseyServlet() {
     ServletHolder servletHolder = new ServletHolder(new HttpServletDispatcher());
-    servletContextHandler.addServlet(servletHolder, "/*");
+    servletContextHandler.setInitParameter("resteasy.servlet.mapping.prefix", "/ws");
+    servletContextHandler.addServlet(servletHolder, "/ws/*");
   }
 
 }

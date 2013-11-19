@@ -16,7 +16,7 @@ configurations {
 }
 
 ext {
-  jettyVersion = '8.1.14.v20131031'
+  jettyVersion = '7.6.8.v20121106'
   slf4jVersion = '1.7.5'
   resteasyVersion = '3.0.5.Final'
   springVersion = '3.2.4.RELEASE'

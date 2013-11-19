@@ -1,1 +1,4 @@
-JTA (JOTM) test for create/destroy SessionFactory at runtime.
+Test project to evaluate
+
+* JTA (with JOTM) with create/destroy Hibernate SessionFactory at runtime.
+* RestEasy (resource, sub-resource, provider, etc.) with Spring & Jetty
