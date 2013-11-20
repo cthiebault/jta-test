@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.request.RequestContextListener;
 
+import com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig;
+
 /**
  *
  */
@@ -58,6 +60,7 @@ public class JettyServer {
     createHttpConnector();
 
     createJerseyServlet();
+//    createSwaggerServlet();
 
     HandlerList handlers = new HandlerList();
     handlers.addHandler(servletContextHandler);
@@ -75,10 +78,19 @@ public class JettyServer {
     jettyServer.addConnector(httpConnector);
   }
 
-  public void createJerseyServlet() {
+  private void createJerseyServlet() {
     ServletHolder servletHolder = new ServletHolder(new HttpServletDispatcher());
-    servletContextHandler.setInitParameter("resteasy.servlet.mapping.prefix", "/ws");
+    servletHolder.setInitParameter("resteasy.servlet.mapping.prefix", "/ws");
+    servletHolder.setInitOrder(1);
     servletContextHandler.addServlet(servletHolder, "/ws/*");
+  }
+
+  private void createSwaggerServlet() {
+    ServletHolder servletHolder = new ServletHolder(new DefaultJaxrsConfig());
+    servletHolder.setInitParameter("api.version", "1.0.0");
+    servletHolder.setInitParameter("swagger.api.basepath", "http://localhost:8085/ws");
+    servletHolder.setInitOrder(2);
+    servletContextHandler.addServlet(servletHolder, "");
   }
 
 }

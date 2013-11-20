@@ -9,8 +9,11 @@ import javax.ws.rs.core.MediaType;
 import org.obiba.jta.service.IntegrationService;
 import org.springframework.stereotype.Component;
 
+import com.wordnik.swagger.annotations.Api;
+
 @Component
 @Path("/inject")
+@Api(value = "/inject", description = "Test injection in resources")
 public class InjectionResource {
 
   @Resource

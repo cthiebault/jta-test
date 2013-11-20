@@ -23,5 +23,18 @@
     <property name="transactionManager" ref="transactionManager"/>
   </bean>
 
+  <!-- swagger stuff -->
+  <bean class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON"/>
+  <bean class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"/>
+  <bean class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"/>
+  <bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
+    <property name="resourcePackage" value="org.obiba.jta.web"/>
+    <property name="version" value="1.0.0"/>
+    <property name="basePath" value="http://localhost:8085/ws"/>
+    <property name="title" value="JTA / RestEasy / Swagger test"/>
+    <property name="description" value="This is a app."/>
+    <property name="contact" value="cedric.thiebault@gmail.com"/>
+    <property name="scan" value="true"/>
+  </bean>
 
 </beans>
