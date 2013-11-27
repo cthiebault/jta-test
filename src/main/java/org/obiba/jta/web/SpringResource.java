@@ -38,6 +38,14 @@ public class SpringResource {
     return Response.ok().build();
   }
 
+  @GET
+  @Path("/user")
+  @ApiOperation(value = "Get user", response = UserDto.class)
+  public UserDto getUser() {
+    log.info("get userDto method");
+    return new UserDtoImpl("Cedric", "Thiebault");
+  }
+
   @Path("/singleton")
   @ApiOperation(value = "/singleton", notes = "Test singleton sub-resources")
   public SpringSingletonSubResource singleton() {
