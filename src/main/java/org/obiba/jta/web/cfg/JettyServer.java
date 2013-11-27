@@ -18,19 +18,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap;
 import org.jboss.resteasy.plugins.spring.SpringContextLoaderListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.request.RequestContextListener;
 
-import com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig;
-
-/**
- *
- */
 public class JettyServer {
-
-  private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
 
   private static final int HTTP_PORT = 8085;
 
@@ -44,7 +35,6 @@ public class JettyServer {
 
   public JettyServer() throws Exception {
 
-    log.info("Configure Jetty Server");
     jettyServer = new Server();
     jettyServer.setSendServerVersion(false);
     jettyServer.setStopAtShutdown(false);
@@ -59,15 +49,13 @@ public class JettyServer {
 
     createHttpConnector();
 
-    createJerseyServlet();
-//    createSwaggerServlet();
+    createRestEasyServlet();
 
     HandlerList handlers = new HandlerList();
     handlers.addHandler(servletContextHandler);
     jettyServer.setHandler(handlers);
 
     jettyServer.start();
-    jettyServer.join();
   }
 
   private void createHttpConnector() {
@@ -78,19 +66,11 @@ public class JettyServer {
     jettyServer.addConnector(httpConnector);
   }
 
-  private void createJerseyServlet() {
+  private void createRestEasyServlet() {
     ServletHolder servletHolder = new ServletHolder(new HttpServletDispatcher());
     servletHolder.setInitParameter("resteasy.servlet.mapping.prefix", "/ws");
     servletHolder.setInitOrder(1);
     servletContextHandler.addServlet(servletHolder, "/ws/*");
-  }
-
-  private void createSwaggerServlet() {
-    ServletHolder servletHolder = new ServletHolder(new DefaultJaxrsConfig());
-    servletHolder.setInitParameter("api.version", "1.0.0");
-    servletHolder.setInitParameter("swagger.api.basepath", "http://localhost:8085/ws");
-    servletHolder.setInitOrder(2);
-    servletContextHandler.addServlet(servletHolder, "");
   }
 
 }

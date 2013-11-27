@@ -1,12 +1,14 @@
 import com.sun.org.apache.xalan.internal.xsltc.cmdline.Compile
 
 apply plugin: 'java'
+apply plugin: 'project-report'
+
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.8'
+  gradleVersion = '1.9'
 }
 
 configurations {
@@ -16,7 +18,6 @@ configurations {
 }
 
 ext {
-  jettyVersion = '7.6.8.v20121106'
   slf4jVersion = '1.7.5'
   resteasyVersion = '3.0.5.Final'
   springVersion = '3.2.4.RELEASE'
@@ -26,27 +27,15 @@ dependencies {
   compile('com.mchange:c3p0:0.9.5-pre5')
   compile('net.sf.ehcache:ehcache-core:2.6.6')
   compile('javax.transaction:jta:1.1')
-  compile("org.eclipse.jetty:jetty-util:${jettyVersion}")
-  compile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-  compile("org.eclipse.jetty:jetty-servlets:${jettyVersion}")
-  compile("org.eclipse.jetty:jetty-continuation:${jettyVersion}")
-  compile("org.eclipse.jetty:jetty-io:${jettyVersion}")
-  compile("org.eclipse.jetty:jetty-ajp:${jettyVersion}")
+  compile('org.eclipse.jetty:jetty-servlet:7.6.8.v20121106')
 
   compile('org.hibernate:hibernate-core:4.2.7.SP1')
   compile('org.hibernate:hibernate-ehcache:4.2.7.SP1')
   compile('org.hsqldb:hsqldb:2.3.1')
 
-  compile("org.jboss.resteasy:resteasy-jaxrs:${resteasyVersion}") {
-    exclude group: 'org.slf4j', module: 'slf4j-simple'
-    exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-    exclude group: 'commons-httpclient', module: 'commons-httpclient'
-    exclude group: 'javax.xml.stream', module: 'stax-api'
-  }
-  compile("org.jboss.resteasy:resteasy-spring:${resteasyVersion}") {
-    exclude group: 'commons-httpclient', module: 'commons-httpclient'
-    exclude group: 'javax.xml.stream', module: 'stax-api'
-  }
+  compile("org.jboss.resteasy:resteasy-jaxrs:${resteasyVersion}")
+  compile("org.jboss.resteasy:resteasy-spring:${resteasyVersion}")
+
   compile('org.ow2.jotm:jotm-core:2.2.3') {
     exclude group: 'org.ow2.carol.irmi', module: 'irmi'
     exclude group: 'org.ow2.cmi', module: 'cmi-admin'

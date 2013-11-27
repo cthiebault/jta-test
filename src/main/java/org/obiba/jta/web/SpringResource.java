@@ -31,22 +31,22 @@ public class SpringResource {
   private SpringSingletonSubResource springSubResource;
 
   @GET
-  @ApiOperation(value = "bla bla", notes = "More notes about this method")
-  @ApiResponses(value = { @ApiResponse(code = 200, message = "OK") })
+  @ApiOperation("get method")
+  @ApiResponses({ @ApiResponse(code = 200, message = "OK") })
   public Response get() {
-    log.info("get");
+    log.info("get method");
     return Response.ok().build();
   }
 
   @Path("/singleton")
-  @ApiOperation(value = "/singleton", notes = "More notes about this method")
+  @ApiOperation(value = "/singleton", notes = "Test singleton sub-resources")
   public SpringSingletonSubResource singleton() {
     log.info("SpringSingletonSubResource: {}", springSubResource);
     return springSubResource;
   }
 
   @Path("/prototype")
-  @ApiOperation(value = "/prototype", notes = "More notes about this method")
+  @ApiOperation(value = "/prototype", notes = "Test prototype sub-resources")
   public SpringPrototypeSubResource prototype() {
     SpringPrototypeSubResource resource = applicationContext.getBean(SpringPrototypeSubResource.class);
     log.info("sub resource: {}", resource);
