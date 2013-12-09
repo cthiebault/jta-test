@@ -1,6 +1,7 @@
 package org.obiba.jta.web;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
@@ -46,8 +47,11 @@ public class SpringResource {
     return new UserDtoImpl("Cedric", "Thiebault");
   }
 
+  @GET
+  @POST
   @Path("/singleton")
-  @ApiOperation(value = "/singleton", notes = "Test singleton sub-resources")
+  @ApiOperation(value = "/singleton", notes = "Test singleton sub-resources",
+      response = SpringSingletonSubResource.class)
   public SpringSingletonSubResource singleton() {
     log.info("SpringSingletonSubResource: {}", springSubResource);
     return springSubResource;

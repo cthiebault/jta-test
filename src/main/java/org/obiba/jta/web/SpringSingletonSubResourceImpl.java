@@ -19,4 +19,10 @@ public class SpringSingletonSubResourceImpl implements SpringSingletonSubResourc
     return Response.ok().build();
   }
 
+  @Override
+  public Response post() {
+    log.debug("Spring singleton sub-resource");
+    return Response.ok().build();
+  }
+
 }
